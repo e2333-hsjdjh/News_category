@@ -1,4 +1,4 @@
-# News Category Classifier (Transformer + Stacking Ensemble)
+# News Category Classifier 
 
 这是一个基于 PyTorch 实现的新闻文本分类项目。该项目从零构建了一个基于 **Transformer Encoder** 的轻量级分类器，并采用了 **Stacking 集成学习** 策略，通过并行训练两个基础模型（标题模型和摘要模型），再利用一个元模型（Meta Model）来融合它们的预测结果，从而实现高精度的分类。
 

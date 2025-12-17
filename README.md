@@ -107,3 +107,46 @@
 1.  **完整输入**: 若同时提供标题和摘要，分别获取两个基础模型的预测概率，输入 Meta Model 得到最终结果。
 2.  **缺失摘要**: 若只有标题，直接使用 Headline Model 的预测结果。
 3.  **缺失标题**: 若只有摘要，直接使用 Description Model 的预测结果。
+
+## 🖥️ 应用程序使用指南
+
+除了在 Notebook 中运行代码，本项目还提供了两个独立的 Python 脚本，方便用户直接使用训练好的模型。
+
+### 1. 可视化分类器 (`show_app.py`)
+这是一个基于 Tkinter 的图形化界面程序，允许用户手动输入新闻标题和摘要，实时获取分类结果。
+
+*   **功能**:
+    *   自动加载当前目录下的 `.pt` 模型文件。
+    *   提供图形界面输入框。
+    *   显示预测类别及置信度 (Confidence)。
+*   **运行方法**:
+    ```bash
+    python3 show_app.py
+    ```
+
+### 2. 批量 CSV 预测工具 (`batch_predict.py`)
+这是一个命令行工具，用于对 CSV 文件中的大量新闻数据进行批量分类。
+
+*   **功能**:
+    *   读取 CSV 文件，自动识别 `headline` 和 `short_description` 列（可配置）。
+    *   使用集成模型进行预测。
+    *   生成包含预测结果 (`predicted_category`) 和置信度 (`confidence`) 的新 CSV 文件。
+*   **运行方法**:
+    ```bash
+    # 基本用法 (默认读取 headline 和 short_description 列)
+    python3 batch_predict.py input_data.csv
+
+    # 指定输出文件名
+    python3 batch_predict.py input_data.csv --output_csv my_results.csv
+
+    # 指定自定义列名
+    python3 batch_predict.py input_data.csv --headline_col Title --desc_col Summary
+    ```
+
+## 🛠️ 快速开始
+
+1.  确保已安装 Python 3.8+ 及 PyTorch。
+2.  打开 `NewsClassifier.ipynb`。
+3.  依次运行所有单元格。
+4.  训练完成后，可以使用底部的 `EnsemblePredictor` 进行自定义新闻分类测试。
+

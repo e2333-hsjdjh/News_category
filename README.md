@@ -19,6 +19,7 @@
 ## 数据库：
 
 本项目运用的数据库是kaggle网站中的 News Category Dataset，原始数据为文件DATA/News_Category_Dataset.json
+点击前往：[News Category Dataset](https://www.kaggle.com/datasets/rmisra/news-category-dataset/data)
 
 ## 训练前的数据处理：
 

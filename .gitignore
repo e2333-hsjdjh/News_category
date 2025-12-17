@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+
+# Data (Large files)
+DATA/*.json
+
+# Virtual Environment
+venv/
+env/
+.env

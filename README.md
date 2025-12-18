@@ -34,6 +34,36 @@
 *   **训练加速**: **MPS (Metal Performance Shaders)**
     *   本项目针对 Apple Silicon 芯片进行了深度优化，利用 MPS 后端调用 GPU 进行训练加速。
 
+## 🧪 模型变体详解 (Model Variants)
+
+本项目提供了四种不同的模型实现，分别位于 `train_model/` 目录下，以探索不同架构在新闻分类任务上的表现：
+
+### 1. 基础 Transformer (`NewsClassifier.ipynb`)
+*   **架构**: 标准的 Transformer Encoder (2层)。
+*   **特点**: 使用绝对位置编码 (Absolute Positional Encoding) 和标准的 LayerNorm。
+*   **定位**: 作为基准模型 (Baseline)，用于验证 Transformer 架构在小数据集上的有效性。
+
+### 2. 高级 Transformer (`NewsClassifier_Advanced.ipynb`) 🌟 *推荐*
+*   **架构**: 改进版的 Transformer。
+*   **核心改进**:
+    *   **RoPE**: 旋转位置编码，提升长文本和相对位置的捕捉能力。
+    *   **RMSNorm**: 替代 LayerNorm，训练更稳定。
+    *   **SwiGLU**: 增强的前馈网络激活函数。
+*   **性能**: 针对 Apple Silicon (M4) 进行了深度优化（预分词、内存锁定），是本项目中**速度与精度平衡最好**的模型。
+
+### 3. BERT 微调 (`NewsClassifier_BERT.ipynb`)
+*   **架构**: 基于 Hugging Face 的 `bert-base-uncased` 预训练模型。
+*   **特点**: 利用了海量语料的预训练知识，通常能达到最高的分类准确率。
+*   **注意**: 训练速度较慢，对显存要求较高。
+
+### 4. GloVe + LSTM/CNN (`NewsClassifier_GloVe.ipynb`)
+*   **架构**: 使用预训练词向量 (Word Embeddings) 配合 Bi-LSTM 或 CNN 提取特征。
+*   **特点**: 传统的深度学习方法，参数量较小，训练速度快。
+*   **📥 GloVe 文件获取方式**:
+    *   本项目使用 `glove.6B.100d.txt` (6B tokens, 100 dimensions)。
+    *   **下载地址**: 请访问 [Stanford GloVe 官网](https://nlp.stanford.edu/projects/glove/) 下载 `glove.6B.zip`。
+    *   **安装**: 解压下载的文件，将 `glove.6B.100d.txt` 放入本项目的 `DATA/` 文件夹中。
+
 ## 数据库：
 
 本项目运用的数据库是kaggle网站中的 News Category Dataset，原始数据为文件DATA/News_Category_Dataset.json

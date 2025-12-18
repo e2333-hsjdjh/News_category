@@ -28,20 +28,20 @@
 └── README.md                   # 项目说明文档
 ```
 
-## 💻 硬件与运行环境 (Hardware & Environment)
+## 💻 硬件与运行环境
 
 *   **设备型号**: MacBook Pro (M4 Chip, 16GB RAM)
-*   **训练加速**: **MPS (Metal Performance Shaders)**
+*   **训练加速**: **MPS**
     *   本项目针对 Apple Silicon 芯片进行了深度优化，利用 MPS 后端调用 GPU 进行训练加速。
 
-## 🧪 模型变体详解 (Model Variants)
+## 🧪 模型改进
 
 本项目提供了四种不同的模型实现，分别位于 `train_model/` 目录下，以探索不同架构在新闻分类任务上的表现：
 
 ### 1. 基础 Transformer (`NewsClassifier.ipynb`)
 *   **架构**: 标准的 Transformer Encoder (2层)。
-*   **特点**: 使用绝对位置编码 (Absolute Positional Encoding) 和标准的 LayerNorm。
-*   **定位**: 作为基准模型 (Baseline)，用于验证 Transformer 架构在小数据集上的有效性。
+*   **特点**: 使用绝对位置编码和标准的 LayerNorm。
+*   **定位**: 作为基准模型，用于验证 Transformer 架构在小数据集上的有效性。
 
 ### 2. 高级 Transformer (`NewsClassifier_Advanced.ipynb`) 🌟 *推荐*
 *   **架构**: 改进版的 Transformer。
@@ -104,7 +104,7 @@
 *   **环境配置**: 设置随机种子以保证结果可复现；自动检测计算设备，优先使用 Apple Silicon 的 **MPS** 加速，其次是 CUDA，最后回退到 CPU。
 *   **数据读取**: 加载 `DATA/dataset.json`，并统计各类别的样本分布，以便后续处理类别不平衡问题。
 
-### 2. 数据预处理 (Preprocessing)
+### 2. 数据预处理 
 *   **自定义分词器 (`WhitespaceTokenizer`)**:
     *   实现了一个轻量级的分词器，不依赖 BERT 等预训练模型。
     *   功能包括：转小写、正则切分标点符号、构建词表、将文本转为 ID 序列。
@@ -113,19 +113,19 @@
     *   继承自 `torch.utils.data.Dataset`。
     *   负责将文本和标签转换为 PyTorch Tensor，并生成 Attention Mask。
 
-### 3. 模型架构 (Model Architecture)
+### 3. 模型架构 
 我们构建了一个基于 Transformer 的文本分类器 `NewsClassifier`：
 *   **Embedding 层**: 将离散的 Token ID 映射为稠密向量。
 *   **Positional Encoding**: 由于 Transformer 是并行处理的，需要注入位置编码（正弦/余弦函数）来保留词序信息。
 *   **Transformer Encoder**: 核心组件，利用多头自注意力机制 (Multi-Head Self-Attention) 捕捉文本中的长距离依赖和语义特征。
-    *   **编码层 (Encoder Layers)**: 2 层。
+    *   **编码层**: 2 层。
 *   **Classifier Head**: 简单的全连接层，将编码后的语义向量映射到类别概率。
 
 #### Transformer 训练与前向传播流程详解
 在训练过程中，数据在模型中的流转步骤如下：
 1.  **输入处理**: 文本被转换为 Token ID 序列，并生成 \`Attention Mask\`（用于标记有效词和填充词）。
-2.  **向量化 (Embedding + Positional)**: Token ID 转换为词向量，并叠加位置编码，使模型理解词序。
-3.  **自注意力机制 (Self-Attention)**:
+2.  **向量化**: Token ID 转换为词向量，并叠加位置编码，使模型理解词序。
+3.  **自注意力机制**:
     *   **Q, K, V 计算**: 输入向量分别映射为 Query (查询), Key (键), Value (值) 矩阵。
     *   **Attention Score**: 计算 Q 和 K 的相似度，衡量词与词之间的关联。
     *   **Masking**: 利用 `Attention Mask` 屏蔽掉 `<pad>` 填充位置，确保模型只关注真实内容。
@@ -134,17 +134,9 @@
 5.  **分类输出**: 提取 \`<cls>\` 标记位置的向量作为整句表示，通过线性层输出各类别的 Logits。
 6.  **损失计算**: 使用 \`CrossEntropyLoss\` 计算预测分布与真实标签的差异，并通过反向传播更新参数。
 
-### 4. 并行双流训练 (Parallel Dual-Stream Training)
-为了充分利用新闻的“标题”和“摘要”信息，我们训练了两个独立的模型。为了提高效率，使用了 **多线程并行 (Multi-threading)** 技术：
-*   **Headline Model**: 仅使用新闻标题进行训练。
-*   **Description Model**: 仅使用新闻摘要进行训练。
-*   **并行执行**: 使用 `concurrent.futures.ThreadPoolExecutor` 同时启动两个训练任务，显著缩短了总训练时间。
-*   **优化策略**:
-    *   **类别权重 (Class Weights)**: 针对数据不平衡，计算了 Loss 权重。
-    *   **学习率调度 (Scheduler)**: 使用 `ReduceLROnPlateau`，当验证集准确率不再提升时自动降低学习率。
 
 ### 5. 集成学习：元模型训练 (Meta-Learning / Stacking)
-这是本项目提升效果的关键步骤。我们不仅仅是简单地平均两个模型的预测，而是训练了一个 **Meta Model** 来学习如何组合它们。
+训练了一个 **Meta Model** 来学习如何组合两个模型的预测。
 *   **数据生成**: 使用验证集数据，分别通过训练好的 Headline Model 和 Description Model，提取它们的预测概率分布（Softmax 输出）。
 *   **特征拼接**: 将两个模型的预测概率拼接成一个长向量，作为 Meta Model 的输入。
 *   **Meta Classifier**: 一个简单的多层感知机 (MLP)，学习从这些概率特征到真实标签的映射。它能自动学会何时该信赖标题模型，何时该信赖摘要模型。

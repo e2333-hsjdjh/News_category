@@ -51,7 +51,7 @@ class NewsClassifierApp:
         self.headline_text.pack(fill=tk.X, pady=(5, 15))
         
         # Description Input
-        ttk.Label(main_frame, text="Short Description (新闻摘要):").pack(anchor=tk.W)
+        ttk.Label(main_frame, text="Short Description (新闻导语):").pack(anchor=tk.W)
         self.desc_text = tk.Text(main_frame, height=5, font=("Helvetica", 11))
         self.desc_text.pack(fill=tk.X, pady=(5, 15))
         

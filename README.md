@@ -1,6 +1,6 @@
 # News Category Classifier 
 
-这是一个基于 PyTorch 实现的新闻文本分类项目。该项目从零构建了一个基于 **Transformer Encoder** 的轻量级分类器，并采用了 **Stacking 集成学习** 策略，通过并行训练两个基础模型（标题模型和摘要模型），再利用一个元模型（Meta Model）来融合它们的预测结果，从而实现高精度的分类。
+这是一个基于 PyTorch 实现的新闻文本分类项目。该项目从零构建了一个基于 **Transformer Encoder** 的轻量级分类器，并采用了 **Stacking 集成学习** 策略，通过并行训练两个基础模型（标题模型和导语模型），再利用一个元模型（Meta Model）来融合它们的预测结果，从而实现高精度的分类。
 
 ## 📂 项目结构
 
@@ -43,7 +43,7 @@
 *   **特点**: 使用绝对位置编码和标准的 LayerNorm。
 *   **定位**: 作为基准模型，用于验证 Transformer 架构在小数据集上的有效性。
 
-### 2. 高级 Transformer (`NewsClassifier_Advanced.ipynb`) 🌟 *推荐*
+### 2. 改进版 Transformer (`NewsClassifier_Advanced.ipynb`)
 *   **架构**: 改进版的 Transformer。
 *   **核心改进**:
     *   **RoPE**: 旋转位置编码，提升长文本和相对位置的捕捉能力。
@@ -139,13 +139,13 @@
 训练了一个 **Meta Model** 来学习如何组合两个模型的预测。
 *   **数据生成**: 使用验证集数据，分别通过训练好的 Headline Model 和 Description Model，提取它们的预测概率分布（Softmax 输出）。
 *   **特征拼接**: 将两个模型的预测概率拼接成一个长向量，作为 Meta Model 的输入。
-*   **Meta Classifier**: 一个简单的多层感知机 (MLP)，学习从这些概率特征到真实标签的映射。它能自动学会何时该信赖标题模型，何时该信赖摘要模型。
+*   **Meta Classifier**: 一个简单的多层感知机 (MLP)，学习从这些概率特征到真实标签的映射。它能自动学会何时该信赖标题模型，何时该信赖导语模型。
 
 ### 6. 智能推理 (Inference)
 `EnsemblePredictor` 类封装了最终的推理逻辑，支持自适应处理缺失数据：
-1.  **完整输入**: 若同时提供标题和摘要，分别获取两个基础模型的预测概率，输入 Meta Model 得到最终结果。
+1.  **完整输入**: 若同时提供标题和导语，分别获取两个基础模型的预测概率，输入 Meta Model 得到最终结果。
 2.  **缺失摘要**: 若只有标题，直接使用 Headline Model 的预测结果。
-3.  **缺失标题**: 若只有摘要，直接使用 Description Model 的预测结果。
+3.  **缺失标题**: 若只有导语，直接使用 Description Model 的预测结果。
 
 ## 🖥️ 应用程序使用指南
 
